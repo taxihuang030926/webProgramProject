@@ -73,7 +73,7 @@ def calc_process(cSocket):
 			result_value = ('ch'.encode('utf-8'), prc_num, mp_status)
 			print(f'Sending result to server: {result_value}')
 			cSocket.send(result)
-			time.sleep(1)
+			time.sleep(0.5)
 
 		client_msg = struct.pack('2s i i', b'ed', start_num, window_size)
 		cSocket.send(client_msg)

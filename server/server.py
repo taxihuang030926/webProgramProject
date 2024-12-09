@@ -42,7 +42,6 @@ class ServerThread(threading.Thread):
 		global mp_list
 		global prc_list
 		
-
 		while True:
 			try:
 				# svr recv cli request for task
@@ -97,6 +96,15 @@ class ServerThread(threading.Thread):
 								mp_list = [0] * WINDOW_SIZE
 						
 					# wait for new response
+
+				elif client_msg and client_unpack[0].decode('utf-8') == 'ft':
+					print(f'{name}: Received message: {client_unpack}')
+					# send mp_list to client
+					server_msg = struct.pack('2s i i', b'rt', len(mp_dict))
+					server_unpacked = ('rt'.encode('utf-8'), len(mp_dict), 0)
+					print(f'Sending mp_list to {name}: {server_unpacked}')
+					self.client.send(server_msg)
+					print(f'{name}: Sent mp_list to client')
 					
 			except socket.error as e:
 				print(f'Socket error: {e}')
