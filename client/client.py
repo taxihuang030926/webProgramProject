@@ -30,14 +30,69 @@ def lucasLehmerTest(prime):
 		s = ((s * s) - 2) % m
 	return s == 0
 
-def get_server_mp_list():
-	pass
+def show_mp(cSocket):
+	# get mp list from server
+	fetch_svr_mp_dict(cSocket)
+	# render info to html page
+
+def fetch_svr_mp_dict(cSocket):
+	client_msg = struct.pack('2s i i', b'ft', 0, 0)
+	cSocket.send(client_msg)
+
+	server_reply = cSocket.recv(BUF_SIZE)
+	server_unpack = struct.unpack('2s i i', server_reply)
+	if server_reply and server_unpack[0].decode('utf-8') == 'rt':
+		print('Received mp list from server')
+		mp_list = server_unpack[1]
+		print(f'Received mp list from server: {mp_list}')
+		return mp_list
+	
+
+def calc_process(cSocket):
+	# request task to server
+	client_msg = struct.pack('2s i i', b'ts', 0, 0)
+	cSocket.send(client_msg)
+	# receive task from server
+	server_reply = cSocket.recv(BUF_SIZE)
+	server_unpack = struct.unpack('2s i i', server_reply) # 'rc', start_num, window_size 
+	if server_reply and server_unpack[0].decode('utf-8') == 'rc':
+		print('Received task from server')
+		start_num = server_unpack[1]
+		window_size = server_unpack[2]
+		mp_status = 0
+		print(f'Received task from server: {start_num}, {window_size}')
+		# calculate
+		for i in range(window_size):
+			prc_num = start_num + i 
+			if isPrime(prc_num) and lucasLehmerTest(prc_num):
+				mp_status = 1
+			else:
+				mp_status = 0
+			# send result to server
+			result = struct.pack('2s i i', b'ch', prc_num, mp_status)
+			result_value = ('ch'.encode('utf-8'), prc_num, mp_status)
+			print(f'Sending result to server: {result_value}')
+			cSocket.send(result)
+			time.sleep(1)
+
+		client_msg = struct.pack('2s i i', b'ed', start_num, window_size)
+		cSocket.send(client_msg)
+
+def select_mode():
+	while True:
+		flag = input("(A)calc process, (B)exit: ")
+		if flag == "A" or flag == "a":
+			print("calc process!")
+			break
+		elif flag == "B" or flag == "b":
+			print("exit!")
+			break
+		else:
+			print("Invalid input. Please try again.")
+
+	return flag
 
 def main():
-	# if(len(sys.argv) < 2):
-	# 	print("Usage: python3 client.py ServerIP")
-	# 	exit(1)
-
 	# Get server IP
 	serverIP = socket.gethostbyname('127.0.0.1')
 	
@@ -60,50 +115,15 @@ def main():
 		print(f'Connected with server {serverIP}:{PORT} Waiting for server response...')
 		
 		# Listen for incoming response from server w\ start_num and window_size
-		window_size = 0
-		start_num = 0
 		while True:
-			try:
-				server_reply = cSocket.recv(BUF_SIZE)
-				unpacked_msg = struct.unpack('2s i i', server_reply)
-				print(unpacked_msg)
-				# receive start_num and window_size
-				if server_reply and unpacked_msg[0].decode('utf-8') == 'rc':
-					print('Received task from server')
-					start_num = unpacked_msg[1]
-					window_size = unpacked_msg[2]
-					mp_status = 0
-					print(f'Received task from server: {start_num}, {window_size}')
-					# calculate mersenne prime number
-					for i in range(window_size):
-						prc_num = start_num + i 
-						if isPrime(prc_num) and lucasLehmerTest(prc_num):
-							mp_status = 1
-						else:
-							mp_status = 0
-						# send result to server
-						result = struct.pack('2s i i', b'ch', prc_num, mp_status)
-						result_value = ('ch'.encode('utf-8'), prc_num, mp_status)
-						print(f'Sending result to server: {result_value}')
-						cSocket.send(result)
-						time.sleep(1)
-				
-				client_msg = struct.pack('2s i i', b'ed', start_num, window_size)
-				cSocket.send(client_msg)
-				
+			flag = select_mode()
+			if flag == "A" or flag == "a":
+				calc_process(cSocket)
+			if flag == "S" or flag == "s":
+				show_mp(cSocket)
+			elif flag == "B" or flag == "b":
+				exit(1)
 
-				# send result to server by loop for window_size
-
-			except socket.error as e:
-				print('Socket error: %s' % str(e))
-				break
-			except KeyboardInterrupt as e:
-				print('KeyboardInterrupt: %s' % str(e))
-				break
-			except Exception as e:
-				print('Other exception: %s' % str(e))
-				break
-			
 	except socket.error as e:
 		print('Socket error: %s' % str(e))
 	except KeyboardInterrupt as e:

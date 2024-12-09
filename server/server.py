@@ -42,53 +42,59 @@ class ServerThread(threading.Thread):
 		global mp_list
 		global prc_list
 		
-		# send task
-		server_msg = struct.pack('2s i i', b'rc', start_num, WINDOW_SIZE)
-		server_unpacked = ('d'.encode('utf-8'), start_num, WINDOW_SIZE)
-		print(f'Sending task to {name}: {server_unpacked}')
-		self.client.send(server_msg)
-		print(f'{name}: Sent task to client')
 
 		while True:
 			try:
-				
-				# receive result
+				# svr recv cli request for task
 				client_msg = self.client.recv(BUF_SIZE)
 				client_unpack = struct.unpack('2s i i', client_msg)
-				if client_msg and client_unpack[0].decode('utf-8') == 'ch':
-					print(f'{name}: Received message: {client_unpack}')
-					# update prc_list
-					prc_list[client_unpack[1] - start_num] += 1
-					# check mp_status then add to mp_list for threshold calc
-					if client_unpack[1] >= start_num and client_unpack[2] == 1:
-						mp_list[client_unpack[1] - start_num] += 1
-						print(f'would be 2^({client_unpack[1]}) - 1: {2 ** client_unpack[1] - 1}')
+				if client_msg and client_unpack[0].decode('utf-8') == 'ts':
 
-				elif client_msg and client_unpack[0].decode('utf-8') == 'ed':
-					print(f'{name}: Received message: {client_unpack}')
-					print(f'{name}: prc_list: {prc_list}')
-					print(f'{name}: mp_list: {mp_list}')
-					threshold_flag = 0
-					for i in range(WINDOW_SIZE):
-						if prc_list[i] < 10:
-							threshold_flag = 1
-							break
-					
-					if threshold_flag == 0:
-						# calculate threshold
-						for i in range(WINDOW_SIZE):
-							if mp_list[i] >= 10:
-								mp_dict[len(mp_dict) + 1] = {
-									"id": len(mp_dict) + 1,
-									"p": start_num + i,
-									"value": 2 ** (start_num + i) - 1
-								}
-						print(f'mp_dict: {mp_dict}')
-						# update start_num
-						start_num += WINDOW_SIZE
-						# reset prc_list and mp_list
-						prc_list = [0] * WINDOW_SIZE
-						mp_list = [0] * WINDOW_SIZE
+					# send task
+					server_msg = struct.pack('2s i i', b'rc', start_num, WINDOW_SIZE)
+					server_unpacked = ('d'.encode('utf-8'), start_num, WINDOW_SIZE)
+					print(f'Sending task to {name}: {server_unpacked}')
+					self.client.send(server_msg)
+					print(f'{name}: Sent task to client')
+
+					for _ in range(WINDOW_SIZE + 1):
+						# receive result
+						client_msg = self.client.recv(BUF_SIZE)
+						client_unpack = struct.unpack('2s i i', client_msg)
+						if client_msg and client_unpack[0].decode('utf-8') == 'ch':
+							print(f'{name}: Received message: {client_unpack}')
+							# update prc_list
+							prc_list[client_unpack[1] - start_num] += 1
+							# check mp_status then add to mp_list for threshold calc
+							if client_unpack[1] >= start_num and client_unpack[2] == 1:
+								mp_list[client_unpack[1] - start_num] += 1
+								print(f'would be 2^({client_unpack[1]}) - 1: {2 ** client_unpack[1] - 1}')
+
+						elif client_msg and client_unpack[0].decode('utf-8') == 'ed':
+							print(f'{name}: Received message: {client_unpack}')
+							print(f'{name}: prc_list: {prc_list}')
+							print(f'{name}: mp_list: {mp_list}')
+							threshold_flag = 0
+							for i in range(WINDOW_SIZE):
+								if prc_list[i] < 10:
+									threshold_flag = 1
+									break
+							
+							if threshold_flag == 0:
+								# calculate threshold
+								for i in range(WINDOW_SIZE):
+									if mp_list[i] >= 10:
+										mp_dict[len(mp_dict) + 1] = {
+											"id": len(mp_dict) + 1,
+											"p": start_num + i,
+											"value": 2 ** (start_num + i) - 1
+										}
+								print(f'mp_dict: {mp_dict}')
+								# update start_num
+								start_num += WINDOW_SIZE
+								# reset prc_list and mp_list
+								prc_list = [0] * WINDOW_SIZE
+								mp_list = [0] * WINDOW_SIZE
 						
 					# wait for new response
 					
