@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mersenne Prime Calculator</title>
+    <title>Mersenne Primes Found</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
@@ -16,12 +16,9 @@
     </nav>
     
     <div class="container">
-        <h1>Distributed Mersenne Prime Calculator</h1>
-        <p>Welcome to our distributed computing project for finding Mersenne primes!</p>
-        <div class="button-group">
-            <a href="{{ url_for('calc') }}" class="btn">Start Calculation</a>
-            <a href="{{ url_for('show_mp') }}" class="btn">View Found Primes</a>
-        </div>
+        <h1>Found Mersenne Primes</h1>
+        <p>Total Mersenne Primes Found: {{ mp_list_count }}</p>
+        <!-- TODO: Add dynamic table population from server dict -->
     </div>
 </body>
 </html>

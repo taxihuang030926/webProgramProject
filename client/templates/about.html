@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mersenne Prime Calculator</title>
+    <title>About Mersenne Primes</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
@@ -16,12 +16,16 @@
     </nav>
     
     <div class="container">
-        <h1>Distributed Mersenne Prime Calculator</h1>
-        <p>Welcome to our distributed computing project for finding Mersenne primes!</p>
-        <div class="button-group">
-            <a href="{{ url_for('calc') }}" class="btn">Start Calculation</a>
-            <a href="{{ url_for('show_mp') }}" class="btn">View Found Primes</a>
-        </div>
+        <h1>About Mersenne Primes</h1>
+        <section>
+            <h2>What are Mersenne Primes?</h2>
+            <p>Mersenne primes are prime numbers of the form 2^p - 1, where p is also a prime number.</p>
+        </section>
+        
+        <section>
+            <h2>Distributed Computing</h2>
+            <p>This project demonstrates how multiple clients can collaborate to find rare mathematical entities by dividing computational tasks.</p>
+        </section>
     </div>
 </body>
 </html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mersenne Prime Calculation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('calc') }}">Calculate</a></li>
+            <li><a href="{{ url_for('show_mp') }}">Mersenne Primes</a></li>
+            <li><a href="{{ url_for('about') }}">About</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        <h1>Mersenne Prime Calculation</h1>
+        
+        <div class="calculation-status">
+            <p>Start Number: {{ start_num }}</p>
+            <p>Window Size: {{ window_size }}</p>
+            <p>Status: {% if is_running %}Running{% else %}Stopped{% endif %}</p>
+        </div>
+        
+        <div class="loading-animation" {% if not is_running %}style="display: none;"{% endif %}>
+            Calculating...
+        </div>
+        
+        <form method="post" class="control-buttons">
+            <button type="submit" name="action" value="start" class="btn">Start</button>
+            <button type="submit" name="action" value="pause" class="btn">Pause</button>
+            <button type="submit" name="action" value="resume" class="btn">Resume</button>
+            <button type="submit" name="action" value="stop" class="btn">Stop</button>
+        </form>
+    </div>
+</body>
+</html>
