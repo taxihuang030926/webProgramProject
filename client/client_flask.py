@@ -1,4 +1,5 @@
 import socket
+import sys
 import struct
 import time
 import threading
@@ -146,5 +147,12 @@ def show_mp():
 def about():
     return render_template('about.html')
 
+def main():
+    if len(sys.argv) < 2:
+        print('Usage: python client_flask.py <port>')
+        sys.exit(1)
+    cport = str(sys.argv[1])
+    app.run(port=cport, debug=True)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    main()

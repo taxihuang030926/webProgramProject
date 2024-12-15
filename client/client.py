@@ -6,7 +6,7 @@ import time
 
 PORT = 55558
 BUF_SIZE = 1024			# Receive buffer size
-local_mp_list = []
+local_mp_dict = {}
 
 def isPrime(number):
 	if number < 2:
@@ -31,21 +31,36 @@ def lucasLehmerTest(prime):
 	return s == 0
 
 def show_mp(cSocket):
+	print("in show_mp()")
 	# get mp list from server
 	fetch_svr_mp_dict(cSocket)
 	# render info to html page
+	print(f"loacal mp: {local_mp_dict}")
 
 def fetch_svr_mp_dict(cSocket):
+	global local_mp_dict
+
+	print("in fetch_svr_mp_dict()")
 	client_msg = struct.pack('2s i i', b'ft', 0, 0)
+	client_msg_value = 'ft'.encode('utf-8'), 0, 0
 	cSocket.send(client_msg)
+	print(f'Sent request to server for mp list: {client_msg_value}')
 
 	server_reply = cSocket.recv(BUF_SIZE)
 	server_unpack = struct.unpack('2s i i', server_reply)
+	print(f'server_unpack: {server_reply}')
 	if server_reply and server_unpack[0].decode('utf-8') == 'rt':
-		print('Received mp list from server')
-		mp_list = server_unpack[1]
-		print(f'Received mp list from server: {mp_list}')
-		return mp_list
+		print(f'Received mp list len from server: {server_unpack[1]}')
+		mp_list_len = server_unpack[1]
+		for i in range(1, mp_list_len + 1):
+			server_reply = cSocket.recv(BUF_SIZE)
+			print(f'server_reply: {server_reply}')
+			server_unpack = struct.unpack('2s i i', server_reply)
+			if server_reply and server_unpack[0].decode('utf-8') == 'mp':
+				mp_p = server_unpack[1]
+				mp = server_unpack[2]
+				local_mp_dict[i] = {"id": i, "p": mp_p, "value": mp}
+				print(f'Received mp {i} from server: {mp_p}, {mp}')
 	
 
 def calc_process(cSocket):
@@ -63,7 +78,7 @@ def calc_process(cSocket):
 		print(f'Received task from server: {start_num}, {window_size}')
 		# calculate
 		for i in range(window_size):
-			prc_num = start_num + i 
+			prc_num = start_num + i  
 			if isPrime(prc_num) and lucasLehmerTest(prc_num):
 				mp_status = 1
 			else:
@@ -83,6 +98,9 @@ def select_mode():
 		flag = input("(A)calc process, (B)exit: ")
 		if flag == "A" or flag == "a":
 			print("calc process!")
+			break
+		elif flag == "S" or flag == "s":
+			print("show MP!")
 			break
 		elif flag == "B" or flag == "b":
 			print("exit!")

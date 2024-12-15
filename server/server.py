@@ -97,14 +97,22 @@ class ServerThread(threading.Thread):
 						
 					# wait for new response
 
+				# send MP dict to client
 				elif client_msg and client_unpack[0].decode('utf-8') == 'ft':
 					print(f'{name}: Received message: {client_unpack}')
 					# send mp_list to client
-					server_msg = struct.pack('2s i i', b'rt', len(mp_dict))
-					server_unpacked = ('rt'.encode('utf-8'), len(mp_dict), 0)
+					server_msg = struct.pack('2s i i', b'rt', len(mp_dict), 0)
+					server_unpacked = 'rt'.encode('utf-8'), len(mp_dict), 0
 					print(f'Sending mp_list to {name}: {server_unpacked}')
 					self.client.send(server_msg)
-					print(f'{name}: Sent mp_list to client')
+					
+					for i in range(len(mp_dict)):
+						# send mp_list to client
+						server_msg = struct.pack('2s i i', b'mp', mp_dict[i + 1]['p'], mp_dict[i + 1]['value'])
+						server_unpacked = ('mp'.encode('utf-8'), mp_dict[i + 1]['p'], mp_dict[i + 1]['value'])
+						print(f'Sending mp_list to {name}: {server_unpacked}')
+						self.client.send(server_msg)
+						time.sleep(1)
 					
 			except socket.error as e:
 				print(f'Socket error: {e}')
