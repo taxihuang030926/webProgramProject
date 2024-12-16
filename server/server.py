@@ -83,7 +83,7 @@ class ServerThread(threading.Thread):
 							if threshold_flag == 0:
 								# calculate threshold
 								for i in range(WINDOW_SIZE):
-									if mp_list[i] >= 10:
+									if mp_list[i] >= 8:
 										mp_dict[len(mp_dict) + 1] = {
 											"id": len(mp_dict) + 1,
 											"p": start_num + i,
@@ -114,7 +114,7 @@ class ServerThread(threading.Thread):
 						server_unpacked = ('mp'.encode('utf-8'), mp_dict[i]['p'], mp_dict[i]['value'])
 						print(f'Sending mp_list to {name}: {server_unpacked}')
 						self.client.send(server_msg)
-						time.sleep(1)
+						time.sleep(0.01)
 					
 			except socket.error as e:
 				print(f'Socket error: {e}')

@@ -17,8 +17,21 @@
     
     <div class="container">
         <h1>Found Mersenne Primes</h1>
-        <p>Total Mersenne Primes Found: {{ mp_list_count }}</p>
+        <p>Total Mersenne Primes Found: </p>
         <!-- TODO: Add dynamic table population from server dict -->
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Exponent</th>
+                <th>Mersenne Prime</th>
+            </tr>
+            {% for mp in mp_list %}
+            <tr>
+                <td>{{ mp.id }}</td>
+                <td>{{ mp.p }}</td>
+                <td>{{ mp.value }}</td>
+            </tr>
+            {% endfor %}
     </div>
 </body>
 </html>
