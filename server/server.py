@@ -70,6 +70,7 @@ class ServerThread(threading.Thread):
 								print(f'would be 2^({client_unpack[1]}) - 1: {2 ** client_unpack[1] - 1}')
 
 						elif client_msg and client_unpack[0].decode('utf-8') == 'ed':
+							# time.sleep(1)
 							print(f'{name}: Received message: {client_unpack}')
 							print(f'{name}: prc_list: {prc_list}')
 							print(f'{name}: mp_list: {mp_list}')
@@ -86,7 +87,7 @@ class ServerThread(threading.Thread):
 										mp_dict[len(mp_dict) + 1] = {
 											"id": len(mp_dict) + 1,
 											"p": start_num + i,
-											"value": 2 ** (start_num + i) - 1
+											"value": str(2 ** (start_num + i) - 1)
 										}
 								print(f'mp_dict: {mp_dict}')
 								# update start_num
@@ -106,10 +107,11 @@ class ServerThread(threading.Thread):
 					print(f'Sending mp_list to {name}: {server_unpacked}')
 					self.client.send(server_msg)
 					
-					for i in range(len(mp_dict)):
+					for i in range(1, len(mp_dict) + 1):
 						# send mp_list to client
-						server_msg = struct.pack('2s i i', b'mp', mp_dict[i + 1]['p'], mp_dict[i + 1]['value'])
-						server_unpacked = ('mp'.encode('utf-8'), mp_dict[i + 1]['p'], mp_dict[i + 1]['value'])
+						s = bytes(mp_dict[i]['value'], 'utf-8')
+						server_msg = struct.pack('2s i I%ds' % (len(s),), b'mp', mp_dict[i]['p'], len(s), s)
+						server_unpacked = ('mp'.encode('utf-8'), mp_dict[i]['p'], mp_dict[i]['value'])
 						print(f'Sending mp_list to {name}: {server_unpacked}')
 						self.client.send(server_msg)
 						time.sleep(1)

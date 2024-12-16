@@ -18,7 +18,6 @@ def isPrime(number):
 			return False
 	return True
 
-
 def lucasLehmerTest(prime):
     # Lucas-Lehmer test
     # m = 2^p - 1
@@ -55,14 +54,13 @@ def fetch_svr_mp_dict(cSocket):
 		for i in range(1, mp_list_len + 1):
 			server_reply = cSocket.recv(BUF_SIZE)
 			print(f'server_reply: {server_reply}')
-			server_unpack = struct.unpack('2s i i', server_reply)
-			if server_reply and server_unpack[0].decode('utf-8') == 'mp':
-				mp_p = server_unpack[1]
-				mp = server_unpack[2]
-				local_mp_dict[i] = {"id": i, "p": mp_p, "value": mp}
+			server_unpack = unpack_helper('2s i I', server_reply)
+			if server_reply and server_unpack[0][0].decode('utf-8') == 'mp':
+				mp_p = server_unpack[0][1]
+				mp = server_unpack[1].decode('utf-8')
+				local_mp_dict[i] = {"id": i, "p": mp_p, "value": int(mp)}
 				print(f'Received mp {i} from server: {mp_p}, {mp}')
 	
-
 def calc_process(cSocket):
 	# request task to server
 	client_msg = struct.pack('2s i i', b'ts', 0, 0)
@@ -92,6 +90,10 @@ def calc_process(cSocket):
 
 		client_msg = struct.pack('2s i i', b'ed', start_num, window_size)
 		cSocket.send(client_msg)
+
+def unpack_helper(fmt, data):
+    size = struct.calcsize(fmt)
+    return struct.unpack(fmt, data[:size]), data[size:]
 
 def select_mode():
 	while True:
